@@ -3,7 +3,7 @@ import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 
 from PIL import Image
-from repvgg import create_RepVGG_A0 as create
+from repvgg import create_RepVGG_A0 as create 
 
 # Load model
 model = create(deploy=True)

@@ -19,6 +19,7 @@ from utils.torch_utils import select_device, time_synchronized
 
 
 def detect(opt):
+    
     source, view_img, imgsz, nosave, show_conf, save_path, show_fps = opt.source, not opt.hide_img, opt.img_size, opt.no_save, not opt.hide_conf, opt.output_path, opt.show_fps
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
@@ -55,6 +56,7 @@ def detect(opt):
     if device.type != 'cpu':
         model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
     t0 = time.time()
+
     for path, img, im0s, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -68,6 +70,28 @@ def detect(opt):
 
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, agnostic=opt.agnostic_nms)
+
+        for i, det in enumerate(pred):  # detections per image
+            for det_item in det:  # 각 detection에 대해 반복
+                # 바운딩 박스, confidence, class, 키포인트 나누기
+                xyxy = det_item[:4]       # [x1, y1, x2, y2]
+                conf = det_item[4]        # confidence
+                cls = det_item[5]         # class
+                kpts = det_item[6:]       # keypoints (있다면)
+
+                # 좌표 및 정보를 보기 쉽게 출력
+                x1, y1, x2, y2 = map(lambda x: x.item(), xyxy)
+                confidence = conf.item()
+                class_idx = int(cls.item())
+                keypoints = [kpt.item() for kpt in kpts]
+
+                print(f"Bounding Box: [{x1:.2f}, {y1:.2f}, {x2:.2f}, {y2:.2f}]")
+                print(f"Confidence: {confidence:.2f}, Class: {class_idx}")
+                if keypoints:
+                    print(f"Keypoints: {keypoints}")
+
+
+
         t2 = time_synchronized()
 
         # Process detections
@@ -112,6 +136,7 @@ def detect(opt):
                     if view_img or not nosave:  
                         # Add bbox to image with emotions on 
                         label = emotions[i][0]
+                        print('라벨', label)
                         colour = colors[emotions[i][1]]
                         i += 1
                         plot_one_box(xyxy, im0, label=label, color=colour, line_thickness=opt.line_thickness)
@@ -174,3 +199,5 @@ if __name__ == '__main__':
     check_requirements(exclude=('pycocotools', 'thop'))
     with torch.no_grad():
         detect(opt=opt)
+
+
