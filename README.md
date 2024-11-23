@@ -1,2 +1,2 @@
 # emotion_recognition
-Emotion Recognition using YOLOv5 + VGG
+Combining facial emotion recognition and phone detection for voice phishing prevention.
