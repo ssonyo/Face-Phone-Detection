@@ -1,0 +1,15 @@
+import requests
+
+# 웹에서 파일 다운로드
+url = "https://cdn.images.fecom-media.com/FE00050612/images/HE1878146_1433773-HOP-SMA-P01_W0oZHIfsW0.jpg"
+
+local_file_path = "face3.jpg"  # 저장할 로컬 파일 이름
+
+response = requests.get(url, stream=True)
+if response.status_code == 200:
+    with open(local_file_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            f.write(chunk)
+    print(f"파일 다운로드 완료: {local_file_path}")
+else:
+    print("파일 다운로드 실패")
